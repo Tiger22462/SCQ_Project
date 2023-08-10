@@ -6,7 +6,7 @@ import { useState,useEffect} from "react";
 import { loadWeb3Address } from "../web3lib/web3_helper";
 import Web3 from "web3";
 
-const Start = () => {
+const start = () => {
 
 	const [address, setAddress] = useState<string | null>(null);
  
@@ -53,10 +53,11 @@ const Start = () => {
 			</div>
 			<div className="Address">
 				<h3> Address : {address}</h3>
+				
 			</div>
 		</div>
 
 	);
 };
 
-export default Start;
+export default start;
