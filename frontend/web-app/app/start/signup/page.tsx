@@ -1,9 +1,8 @@
-
 //first page for connect button
 
-"use client"
+"use client";
 import { useState, useEffect } from "react";
-import { loadWeb3Address } from "../../web3lib/web3_helper";
+import { loadWeb3Address, loadSignupContract } from "../../web3lib/web3_helper";
 import Web3 from "web3";
 
 type UserSignup = {
@@ -11,27 +10,32 @@ type UserSignup = {
   email: string;
   phone: string;
   password: string;
+  address: string
 };
 
-
-
 const signup = () => {
-
   //signup page const
   const initialUserSignup = {
     username: "",
     email: "",
     phone: "",
     password: "",
+    address: ""
   };
   const [userSignup, setUserSignup] = useState<UserSignup>(initialUserSignup);
   //web3 const
   const [address, setAddress] = useState<string | null>(null);
-
-  //Load Dynamic account with useEffect
+  const [signupcontract, setSignupContract] = useState<any>(null);
+  //contract add format
+  //const [<contractname>,<setContractName>] = useState<any>(null);
+  const [web3flag, setWeb3flag] = useState(false);
+  const [checkstring,setCheckString] =useState<string | null>(null);
+  
+  //useEffect for web3
   useEffect(() => {
+    ///////////////////////////////////////////////////////
+    //Load Dynamic account with useEffect
     const web3 = new Web3((window as any).ethereum);
-
     (window as any).ethereum
       .request({ method: "eth_accounts" })
       .then((accounts: string[]) => {
@@ -51,13 +55,35 @@ const signup = () => {
         setAddress(null);
       }
     });
+    ///////////////////////////////////////////////////////
+    //Load contract
+    const loadcontract = async () => {
+      try {
+        if (web3flag != true) {
+          let data = await loadSignupContract();
+          setSignupContract(data.contractdata);
+          //more contract here
+          setWeb3flag(true);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    loadcontract();
+    ///////////////////////////////////////////////////////
   });
 
   const onSignup = async () => {
-    console.log("data = " ,userSignup)
+    signupcontract.methods
+      .createString(userSignup.username)
+      .send({ from: address });
+  };
+
+  const checkSignup = () => {
+    setCheckString(signupcontract.methods
+      .getString(userSignup.address)
+      .call({from: address}))
   }
-
-
 
   return (
     <div>
@@ -118,14 +144,26 @@ const signup = () => {
           />
         </div>
         <div className="button">
-          <button onClick={onSignup}>
-            Signup
-          </button>
+          <button onClick={onSignup}>Signup</button>
         </div>
-
+        <div className="Address">
+          <label> Addresscheck </label>
+          <input
+            type="text"
+            name="Address"
+            id="Address"
+            placeholder="Address"
+            onChange={(e) => {
+              setUserSignup({ ...userSignup, address: e.target.value });
+            }}
+          />
+        </div>
+        <div className="Checkbutton">
+          <button onClick={checkSignup}>Check Value</button>
+          <h3>{checkstring}</h3>
+        </div>
       </div>
     </div>
-
   );
 };
 
