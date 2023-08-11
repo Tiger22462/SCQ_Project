@@ -30,3 +30,8 @@ export const loadWeb3Address = async () => {
 };
 
 ////////////////////////////////////////////////////////////////////
+
+
+export const loadSignupContract = () => {
+
+};
