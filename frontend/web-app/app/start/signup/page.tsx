@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { loadWeb3Address, loadSignupContract } from "../../web3lib/web3_helper";
 import Web3 from "web3";
 
+
+
 type UserSignup = {
   username: string;
   email: string;
@@ -29,8 +31,8 @@ const signup = () => {
   //contract add format
   //const [<contractname>,<setContractName>] = useState<any>(null);
   const [web3flag, setWeb3flag] = useState(false);
-  const [checkstring,setCheckString] =useState<string | null>(null);
-  
+  const [checkstring, setCheckString] = useState<string | null>(null);
+
   //useEffect for web3
   useEffect(() => {
     ///////////////////////////////////////////////////////
@@ -77,14 +79,50 @@ const signup = () => {
     signupcontract.methods
       .createString(userSignup.username)
       .send({ from: address });
+
+
+    signupcontract.events.StringCreated({
+      // Additional options, like fromBlock, toBlock, etc.
+    })
+      .on('data', (event: any) => {
+        console.log('StringCreated event received:', event.returnValues.data);
+
+      })
   };
 
   const checkSignup = () => {
     setCheckString(signupcontract.methods
       .getString(userSignup.address)
-      .call({from: address}))
+      .call({ from: address }))
   }
 
+  
+  // const sendapi = async () => {
+  //   const name = "Tiger";
+  //   const url = "http://localhost:3003/insert"; // Update with the actual URL of your backend
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ name }), // Send the name as JSON in the request body
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       console.log(data.message); // The response message from the backend
+  //     } else {
+  //       console.error("Error sending data to backend");
+  //     }
+  //   } catch (error) {
+  //     console.error("An error occurred:", error);
+  //   }
+  // };
+
+
+  
   return (
     <div>
       <div className="Upper">
@@ -161,6 +199,9 @@ const signup = () => {
         <div className="Checkbutton">
           <button onClick={checkSignup}>Check Value</button>
           <h3>{checkstring}</h3>
+        </div>
+        <div className="Apibutton">
+          <button >Send Api</button>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 contract SignupContract {
     address public owner;
     mapping(address => string) private stringData;
-
+    event StringCreated(address indexed userAddress, string data);
     constructor() {
         owner = msg.sender;
     }
@@ -16,6 +16,7 @@ contract SignupContract {
 
     function createString(string memory data) public {
         stringData[msg.sender] = data;
+        emit StringCreated(msg.sender, data);
     }
 
     function getString(address user) public view returns (string memory) {
