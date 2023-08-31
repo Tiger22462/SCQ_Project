@@ -2,7 +2,7 @@ import Web3 from "web3";
 import SignupContract from "../../../../backend/smartcontract/build/contracts/SignupContract.json"
 
 
-////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 
 //loadWeb3Address return user.address ex. 0x34752E0DeC3d55xxxxxxxx
 export const loadWeb3Address = async () => {
