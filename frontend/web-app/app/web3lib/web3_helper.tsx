@@ -1,52 +1,71 @@
-import Web3 from "web3";
-import SignupContract from "../../../../backend/smartcontract/build/contracts/SignupContract.json"
+import Web3, { Contract, providers } from "web3";
+import { ethers} from "ethers";
+import SignupContract from "../../../../backend/smartcontract/build/contracts/SignupContract.json";
 
 
-/////////////////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////
 //loadWeb3Address return user.address ex. 0x34752E0DeC3d55xxxxxxxx
 export const loadWeb3Address = async () => {
+  //Check if connect to metamask or not?
   if ((window as any).ethereum) {
-    (window as any).web3 = new Web3((window as any).ethereum);
+    console.log("Requesting account");
     try {
-      // Request user permission to connect to their Ethereum accounts.
-      await (window as any).ethereum.enable();
-    } catch (error) {
-      // User denied account access...
-      console.error("User denied account access:", error);
+      const address = await (window as any).ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      return {address : address[0]}
+    } catch {
+      console.log("Please connect to metamask!");
     }
-  } else if ((window as any).web3) {
-    // Legacy dapp browsers...
-    (window as any).web3 = new Web3((window as any).web3.currentProvider);
-  } else {
-    // Non-Ethereum browser detected...
-    window.alert(
-      "Non-Ethereum browser detected. You should consider trying MetaMask!"
-    );
   }
-  //load account value and return to use for frontend
-  const web3 = (window as any).web3;
-  const address = await web3.eth.getAccounts();
-  return { address };
+};
+////////////////////////////////////////////////////////////////////
+//set contractdata to use methods
+
+export const loadSignupContract = async () => {
+     
+  const provider = new ethers.BrowserProvider((window as any).ethereum)
+  const signer = await provider.getSigner()
+  //console.log(signer)
+  const contractdata = new ethers.Contract(SignupContract.networks[5777].address, SignupContract.abi, signer);
+  //console.log(contractdata)
+
+
+  return { contractdata }
+
+  // const provider = new ethers.BrowserProvider((window as any).ethereum)
+  // const signer = await provider.getSigner()
+  // const contractdata = new ethers.Contract(SignupContract.networks[5777].address, SignupContract.abi, signer);
+  // let tx = await contractdata.createString("Tiger")
 };
 
 ////////////////////////////////////////////////////////////////////
 
 //set contractdata to use methods
-export const loadSignupContract = async () => {
-  const web3 = (window as any).web3;
-  (window as any).web3 = new Web3((window as any).ethereum)
-  // Load ETH account
-  const address = await web3.eth.getAccounts();
-  // Network ID
-  const networkId = await web3.eth.net.getId();
-  //Set contract data
-  const contractdata = new web3.eth.Contract(
-    SignupContract.abi,
-    (SignupContract.networks as any)[networkId].address
-  );
-  return { contractdata};
 
+export const loadSignupContract1 = async () => {
+  if ((window as any) .ethereum) {
+    await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+  }
+
+  const provider = new (ethers as any).providers.Web3Provider((window as any).ethereum);
+  
+  // Load ETH account
+  const signer = provider.getSigner();
+  const address = await signer.getAddress();
+
+  // Network ID
+  const networkId = (await provider.getNetwork()).chainId;
+
+  // Set contract data
+  const contractdata = new ethers.Contract(
+    (SignupContract.networks as any)[networkId].address,
+    SignupContract.abi,
+    signer
+  );
+
+  return { contractdata };
 };
+
 
 ////////////////////////////////////////////////////////////////////

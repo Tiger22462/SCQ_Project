@@ -3,6 +3,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { loadWeb3Address, loadSignupContract } from "../../web3lib/web3_helper";
+import { ethers } from "ethers";
 import Web3 from "web3";
 
 
@@ -37,26 +38,36 @@ const signup = () => {
   useEffect(() => {
     ///////////////////////////////////////////////////////
     //Load Dynamic account with useEffect
-    const web3 = new Web3((window as any).ethereum);
-    (window as any).ethereum
-      .request({ method: "eth_accounts" })
-      .then((accounts: string[]) => {
-        if (accounts.length > 0) {
-          setAddress(accounts[0]);
-        }
-      })
-      .catch((error: any) => {
-        console.error("Error fetching accounts:", error);
-      });
+    async function request_Account() {
 
-    // Listen for account changes
-    (window as any).ethereum.on("accountsChanged", (accounts: string[]) => {
-      if (accounts.length > 0) {
-        setAddress(accounts[0]);
-      } else {
-        setAddress(null);
-      }
-    });
+			//Check if connect to metamask or not?
+			if ((window as any).ethereum) {
+				//console.log("Requesting account")
+				try {
+					const address = await (window as any).ethereum.request({
+						method: "eth_requestAccounts"
+					});
+					//console.log(address[0])
+					setAddress(address[0])
+					//console.log((window as any).ethereum.isConnected())
+
+				}
+				catch {
+					console.log("Please connect to metamask!")
+				}
+				//event listen for account change
+				(window as any).ethereum.on("accountsChanged", (address: string[]) => {
+					      if (address.length > 0) {
+							//console.log(address[0])
+					        setAddress(address[0]);
+					      } else {
+							console.log("no accounts")
+					        setAddress(null);
+					      }
+					    });
+			}else {alert("Metamask is not installed!")}
+		}
+		request_Account()
     ///////////////////////////////////////////////////////
     //Load contract
     const loadcontract = async () => {
@@ -72,28 +83,28 @@ const signup = () => {
       }
     };
     loadcontract();
+    //console.log(signupcontract)
     ///////////////////////////////////////////////////////
   });
 
   const onSignup = async () => {
-    signupcontract.methods
-      .createString(userSignup.username)
-      .send({ from: address });
+    console.log(userSignup.username)
+    signupcontract.createString(userSignup.username)
+    //signupcontract.createString("Tiger");
+    //signupcontract.createString
 
+    //signupcontract.
+    // signupcontract.events.StringCreated({
+    //   // Additional options, like fromBlock, toBlock, etc.
+    // })
+    //   .on('data', (event: any) => {
+    //     console.log('StringCreated event received:', event.returnValues.data);
 
-    signupcontract.events.StringCreated({
-      // Additional options, like fromBlock, toBlock, etc.
-    })
-      .on('data', (event: any) => {
-        console.log('StringCreated event received:', event.returnValues.data);
-
-      })
+    //   })
   };
 
   const checkSignup = () => {
-    setCheckString(signupcontract.methods
-      .getString(userSignup.address)
-      .call({ from: address }))
+    setCheckString(signupcontract.getString(userSignup.address))
   }
 
   
