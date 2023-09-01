@@ -1,6 +1,7 @@
 import Web3, { Contract, providers } from "web3";
 import { ethers} from "ethers";
 import SignupContract from "../../../../backend/smartcontract/build/contracts/SignupContract.json";
+import { sign } from "crypto";
 
 
 ////////////////////////////////////////////////////////////////////
@@ -22,16 +23,18 @@ export const loadWeb3Address = async () => {
 ////////////////////////////////////////////////////////////////////
 //set contractdata to use methods
 
-export const loadSignupContract = async () => {
-     
+export const loadSignupContract = async (address:any) => {
+  
+  console.log(address)
   const provider = new ethers.BrowserProvider((window as any).ethereum)
-  const signer = await provider.getSigner()
+  const signer = await provider.getSigner(address)
+  console.log(signer)
   //console.log(signer)
   const contractdata = new ethers.Contract(SignupContract.networks[5777].address, SignupContract.abi, signer);
   //console.log(contractdata)
 
 
-  return { contractdata }
+  return { contractdata , signer}
 
   // const provider = new ethers.BrowserProvider((window as any).ethereum)
   // const signer = await provider.getSigner()

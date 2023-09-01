@@ -20,7 +20,7 @@ contract SignupContract {
     }
 
     function getString(address user) public view returns (string memory) {
-        if (user == msg.sender || user == owner) {
+        if (user == msg.sender) {
             return stringData[user];
         } else {
             return "Access denied";

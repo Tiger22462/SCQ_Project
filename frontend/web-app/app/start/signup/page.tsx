@@ -72,12 +72,12 @@ const signup = () => {
     //Load contract
     const loadcontract = async () => {
       try {
-        if (web3flag != true) {
-          let data = await loadSignupContract();
+        //if (web3flag != true) {
+          let data = await loadSignupContract(address);
           setSignupContract(data.contractdata);
           //more contract here
           setWeb3flag(true);
-        }
+        
       } catch (error) {
         console.log(error);
       }
@@ -85,10 +85,11 @@ const signup = () => {
     loadcontract();
     //console.log(signupcontract)
     ///////////////////////////////////////////////////////
-  });
+  },[address]);
 
   const onSignup = async () => {
     console.log(userSignup.username)
+    // const Tiger = await loadSignupContract(address)
     signupcontract.createString(userSignup.username)
     //signupcontract.createString("Tiger");
     //signupcontract.createString
@@ -103,7 +104,10 @@ const signup = () => {
     //   })
   };
 
-  const checkSignup = () => {
+  const checkSignup = async () => {
+    // const Tiger = await loadSignupContract(address)
+    // console.log(await loadSignupContract(address))
+    // console.log(await Tiger.signer.getAddress())
     setCheckString(signupcontract.getString(userSignup.address))
   }
 
