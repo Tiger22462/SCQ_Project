@@ -18,6 +18,8 @@ const start = () => {
         console.error("Error fetching Ethereum account:", error);
       });
     //listener for change account
+	if(address)
+	{
     (window as any).ethereum.on("accountsChanged", (address: string[]) => {
       if (address.length > 0) {
         setAddress(address[0]);
@@ -26,6 +28,7 @@ const start = () => {
         setAddress(null);
       }
     });
+}
   }, []);
 
   //web3 const
