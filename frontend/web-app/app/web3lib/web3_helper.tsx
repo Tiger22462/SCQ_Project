@@ -19,13 +19,13 @@ export const loadWeb3Address = async () => {
       } catch (error) {
         if ((error as any).code === 4001) {
           // User rejected the connection
-          console.log("User rejected connection to Metamask.");
+          alert("User rejected connection to Metamask.");
         } else {
           console.error("An error occurred while connecting to Metamask:", error);
         }
       }
     } else {
-      console.log("Metamask not detected. Please install or enable Metamask.");
+      alert("Metamask not detected. Please install or enable Metamask.");
     }
   } catch (err) {
     console.error("An error occurred:", err);
@@ -64,14 +64,12 @@ export const loadSignupContract = async (address:any) => {
 
 export const request_Account = () => {
   return new Promise<string | null>((resolve) => {
-    // Event listener for account change
-    (window as any).ethereum.on("accountsChanged", (address: string[]) => {
-      if (address.length > 0) {
-        resolve(address[0]);
-      } else {
-        console.log("No accounts");
-        resolve(null);
-      }
-    });
+    // Check if MetaMask is installed and has an active Ethereum provider
+    if ((window as any).ethereum && (window as any).ethereum.selectedAddress) {
+      resolve((window as any).ethereum.selectedAddress);
+    } else {
+      console.log("No accounts");
+      resolve(null);
+    }
   });
 }

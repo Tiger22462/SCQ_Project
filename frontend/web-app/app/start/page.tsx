@@ -8,14 +8,25 @@ const start = () => {
   const [address, setAddress] = useState<string | null>(null);
   //Load Dynamic account with useEffect
   useEffect(() => {
-    request_Account()
-      .then((result) => {
-        setAddress(result);
-      })
-      .catch((error) => {
-        console.error("Error fetching Ethereum account:", error);
-      });
-  }, [])
+	// Fetch the initial account address
+	request_Account()
+	  .then((result) => {
+		setAddress(result);
+	  })
+	  .catch((error) => {
+		console.error("Error fetching Ethereum account:", error);
+	  });
+  
+	// Also, set up the event listener for future account changes
+	(window as any).ethereum.on("accountsChanged", (address: string[]) => {
+		if (address.length > 0) {
+		  setAddress(address[0]);
+		} else {
+		  console.log("No accounts");
+		  setAddress(null);
+		}
+	});
+  }, []);
 
   const loadAddress = async () => {
 		const web3_address = loadWeb3Address();
