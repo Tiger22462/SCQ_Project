@@ -38,27 +38,28 @@ const signup = () => {
   //useEffect for web3
   useEffect(() => {
     // Fetch the initial account address
-    req_InitAccount()
-      .then((result) => {
-        setAddress(result);
-      })
-      .catch((error) => {
-        console.error("Error fetching Ethereum account:", error);
+    if (typeof (window as any).ethereum !== "undefined") {
+      req_InitAccount()
+        .then((result) => {
+          setAddress(result);
+        })
+        .catch((error) => {
+          console.error("Error fetching Ethereum account:", error);
+        });
+      //listener for change account
+
+      (window as any).ethereum.on("accountsChanged", (address: string[]) => {
+        if (address.length > 0) {
+          setAddress(address[0]);
+        } else {
+          console.log("No accounts");
+          setAddress(null);
+        }
       });
-    //listener for change account
-    
-    
-    (window as any).ethereum.on("accountsChanged", (address: string[]) => {
-      if (address.length > 0) {
-        setAddress(address[0]);
-      } else {
-        console.log("No accounts");
-        setAddress(null);
+
+      if (address) {
+        loadcontract();
       }
-    });
-    
-    if (address) {
-      loadcontract();
     }
   }, [address]);
 
