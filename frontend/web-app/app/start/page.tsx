@@ -2,35 +2,40 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { loadWeb3Address,request_Account} from "../web3lib/web3_helper";
+import { loadWeb3Address, req_InitAccount } from "../web3lib/web3_helper";
 
 const start = () => {
   const [address, setAddress] = useState<string | null>(null);
-  //Load Dynamic account with useEffect
+
+  // Web3 useEffect Load Dynamic account with useEffect
   useEffect(() => {
-	// Fetch the initial account address
-	request_Account()
-	  .then((result) => {
-		setAddress(result);
-	  })
-	  .catch((error) => {
-		console.error("Error fetching Ethereum account:", error);
-	  });
-  
-	// Also, set up the event listener for future account changes
-	(window as any).ethereum.on("accountsChanged", (address: string[]) => {
-		if (address.length > 0) {
-		  setAddress(address[0]);
-		} else {
-		  console.log("No accounts");
-		  setAddress(null);
-		}
-	});
+    // Fetch the initial account address
+    req_InitAccount()
+      .then((result) => {
+        setAddress(result);
+      })
+      .catch((error) => {
+        console.error("Error fetching Ethereum account:", error);
+      });
+    //listener for change account
+    (window as any).ethereum.on("accountsChanged", (address: string[]) => {
+      if (address.length > 0) {
+        setAddress(address[0]);
+      } else {
+        console.log("No accounts");
+        setAddress(null);
+      }
+    });
   }, []);
 
+  //web3 const
   const loadAddress = async () => {
-		const web3_address = loadWeb3Address();
-		setAddress(((web3_address) as any).address);
+    if (address) {
+      alert("account already loaded");
+    } else {
+      const web3_address = loadWeb3Address();
+      setAddress((web3_address as any).address);
+    }
   };
 
   return (

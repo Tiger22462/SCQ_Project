@@ -1,8 +1,5 @@
-import Web3, { Contract, providers } from "web3";
-import { ethers} from "ethers";
+import { ethers } from "ethers";
 import SignupContract from "../../../../backend/smartcontract/build/contracts/SignupContract.json";
-import { sign } from "crypto";
-
 
 ////////////////////////////////////////////////////////////////////
 //loadWeb3Address return user.address ex. 0x34752E0DeC3d55xxxxxxxx
@@ -17,11 +14,18 @@ export const loadWeb3Address = async () => {
         });
         return { address: address[0] };
       } catch (error) {
+        //User rejected the connection
         if ((error as any).code === 4001) {
-          // User rejected the connection
           alert("User rejected connection to Metamask.");
+        }
+        //User forgot to see popup
+        if ((error as any).code === -32002) {
+          alert("Please check your metamask Popup");
         } else {
-          console.error("An error occurred while connecting to Metamask:", error);
+          console.error(
+            "An error occurred while connecting to Metamask:",
+            error
+          );
         }
       }
     } else {
@@ -32,37 +36,8 @@ export const loadWeb3Address = async () => {
   }
 };
 ////////////////////////////////////////////////////////////////////
-//set contractdata to use methods
-
-export const loadSignupContract = async (address:any) => {
-  
-  console.log(address)
-  const provider = new ethers.BrowserProvider((window as any).ethereum)
-  const signer = await provider.getSigner(address)
-  console.log(signer)
-  //console.log(signer)
-  const contractdata = new ethers.Contract(SignupContract.networks[5777].address, SignupContract.abi, signer);
-  //console.log(contractdata)
-
-
-  return { contractdata , signer}
-
-  // const provider = new ethers.BrowserProvider((window as any).ethereum)
-  // const signer = await provider.getSigner()
-  // const contractdata = new ethers.Contract(SignupContract.networks[5777].address, SignupContract.abi, signer);
-  // let tx = await contractdata.createString("Tiger")
-};
-
-////////////////////////////////////////////////////////////////////
-
-//set contractdata to use methods
-
-
-
-////////////////////////////////////////////////////////////////////
-
-
-export const request_Account = () => {
+//for request when user already connected to metamask
+export const req_InitAccount = () => {
   return new Promise<string | null>((resolve) => {
     // Check if MetaMask is installed and has an active Ethereum provider
     if ((window as any).ethereum && (window as any).ethereum.selectedAddress) {
@@ -72,4 +47,21 @@ export const request_Account = () => {
       resolve(null);
     }
   });
-}
+};
+
+////////////////////////////////////////////////////////////////////
+//set contractdata to use methods
+export const loadSignupContract = async (address: any) => {
+  console.log(address);
+  const provider = new ethers.BrowserProvider((window as any).ethereum);
+  const signer = await provider.getSigner(address);
+  console.log(signer);
+  //console.log(signer)
+  const contractdata = new ethers.Contract(
+    SignupContract.networks[5777].address,
+    SignupContract.abi,
+    signer
+  );
+  return { contractdata, signer };
+};
+
