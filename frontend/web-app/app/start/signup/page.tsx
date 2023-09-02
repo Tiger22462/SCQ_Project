@@ -2,10 +2,7 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { loadWeb3Address, loadSignupContract } from "../../web3lib/web3_helper";
-import { ethers } from "ethers";
-import Web3 from "web3";
-
+import {loadSignupContract, req_InitAccount,loadWeb3Address,} from "../../web3lib/web3_helper";
 
 
 type UserSignup = {
@@ -13,7 +10,7 @@ type UserSignup = {
   email: string;
   phone: string;
   password: string;
-  address: string
+  address: string;
 };
 
 const signup = () => {
@@ -23,121 +20,102 @@ const signup = () => {
     email: "",
     phone: "",
     password: "",
-    address: ""
+    address: "",
   };
   const [userSignup, setUserSignup] = useState<UserSignup>(initialUserSignup);
+
   //web3 const
   const [address, setAddress] = useState<string | null>(null);
   const [signupcontract, setSignupContract] = useState<any>(null);
+
   //contract add format
   //const [<contractname>,<setContractName>] = useState<any>(null);
-  const [web3flag, setWeb3flag] = useState(false);
   const [checkstring, setCheckString] = useState<string | null>(null);
 
   //useEffect for web3
   useEffect(() => {
-    ///////////////////////////////////////////////////////
-    //Load Dynamic account with useEffect
-    async function request_Account() {
-
-			//Check if connect to metamask or not?
-			if ((window as any).ethereum) {
-				//console.log("Requesting account")
-				try {
-					const address = await (window as any).ethereum.request({
-						method: "eth_requestAccounts"
-					});
-					//console.log(address[0])
-					setAddress(address[0])
-					//console.log((window as any).ethereum.isConnected())
-
-				}
-				catch {
-					console.log("Please connect to metamask!")
-				}
-				//event listen for account change
-				(window as any).ethereum.on("accountsChanged", (address: string[]) => {
-					      if (address.length > 0) {
-							//console.log(address[0])
-					        setAddress(address[0]);
-					      } else {
-							console.log("no accounts")
-					        setAddress(null);
-					      }
-					    });
-			}else {alert("Metamask is not installed!")}
-		}
-		request_Account()
-    ///////////////////////////////////////////////////////
-    //Load contract
-    const loadcontract = async () => {
-      try {
-        //if (web3flag != true) {
-          let data = await loadSignupContract(address);
-          setSignupContract(data.contractdata);
-          //more contract here
-          setWeb3flag(true);
-        
-      } catch (error) {
-        console.log(error);
+    // Fetch the initial account address
+    req_InitAccount()
+      .then((result) => {
+        setAddress(result);
+      })
+      .catch((error) => {
+        console.error("Error fetching Ethereum account:", error);
+      });
+    //listener for change account
+    (window as any).ethereum.on("accountsChanged", (address: string[]) => {
+      if (address.length > 0) {
+        setAddress(address[0]);
+      } else {
+        console.log("No accounts");
+        setAddress(null);
       }
-    };
-    loadcontract();
-    //console.log(signupcontract)
-    ///////////////////////////////////////////////////////
-  },[address]);
+    });
+
+    if (address) {
+      loadcontract();
+    }
+  }, [address]);
+
+  //const for web3
+  const loadAddress = async () => {
+    if (address) {
+      alert("account already loaded");
+    } else {
+      const web3_address = loadWeb3Address();
+      setAddress((web3_address as any).address);
+    }
+  };
+
+  const loadcontract = async () => {
+    try {
+      let data = await loadSignupContract(address);
+      setSignupContract(data.contractdata);
+      //more contract here
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //const for front end
 
   const onSignup = async () => {
-    console.log(userSignup.username)
-    // const Tiger = await loadSignupContract(address)
-    signupcontract.createString(userSignup.username)
-    //signupcontract.createString("Tiger");
-    //signupcontract.createString
+    try {
+      if (address) {
+        console.log(userSignup.username);
 
-    //signupcontract.
-    // signupcontract.events.StringCreated({
-    //   // Additional options, like fromBlock, toBlock, etc.
-    // })
-    //   .on('data', (event: any) => {
-    //     console.log('StringCreated event received:', event.returnValues.data);
+        const tx = await signupcontract.createString(userSignup.username);
+        await tx.wait();
 
-    //   })
+      } else {
+        alert("No address. Please connect to MetaMask.");
+      }
+    } catch (error) {
+      if (
+        (error as any).message.includes(
+          "ethers-user-denied: MetaMask Tx Signature"
+        )
+      ) {
+        alert("User denied the transaction in MetaMask.");
+      } else {
+        console.error(
+          "Error during contract method call:",
+          (error as any).message
+        );
+      }
+    }
   };
 
   const checkSignup = async () => {
-    // const Tiger = await loadSignupContract(address)
-    // console.log(await loadSignupContract(address))
-    // console.log(await Tiger.signer.getAddress())
-    setCheckString(signupcontract.getString(userSignup.address))
-  }
+    if (userSignup.address && address) {
+      setCheckString(signupcontract.getString(userSignup.address));
+    } else if (!userSignup.address) {
+      alert("Please enter address");
+    } else if (!address) {
+      alert("No address please connect to metamask");
+    }
+  };
 
-  
-  // const sendapi = async () => {
-  //   const name = "Tiger";
-  //   const url = "http://localhost:3003/insert"; // Update with the actual URL of your backend
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ name }), // Send the name as JSON in the request body
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       console.log(data.message); // The response message from the backend
-  //     } else {
-  //       console.error("Error sending data to backend");
-  //     }
-  //   } catch (error) {
-  //     console.error("An error occurred:", error);
-  //   }
-  // };
-
-
-  
   return (
     <div>
       <div className="Upper">
@@ -215,8 +193,8 @@ const signup = () => {
           <button onClick={checkSignup}>Check Value</button>
           <h3>{checkstring}</h3>
         </div>
-        <div className="Apibutton">
-          <button >Send Api</button>
+        <div className="Metamask button">
+          <button onClick={loadAddress}>Metamask Button</button>
         </div>
       </div>
     </div>
