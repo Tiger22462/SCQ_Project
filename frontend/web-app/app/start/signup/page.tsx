@@ -2,8 +2,11 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import {loadSignupContract, req_InitAccount,loadWeb3Address,} from "../../web3lib/web3_helper";
-
+import {
+  loadSignupContract,
+  req_InitAccount,
+  loadWeb3Address,
+} from "../../web3lib/web3_helper";
 
 type UserSignup = {
   username: string;
@@ -86,7 +89,6 @@ const signup = () => {
 
         const tx = await signupcontract.createString(userSignup.username);
         await tx.wait();
-
       } else {
         alert("No address. Please connect to MetaMask.");
       }
@@ -114,6 +116,15 @@ const signup = () => {
     } else if (!address) {
       alert("No address please connect to metamask");
     }
+  };
+
+  //Event handle for send data to database
+  const startListener = async () => {
+    function handleStringCreated(userAddress: string, data: string) {
+      console.log("StringCreated event received for user:", userAddress);
+      console.log("String data:", data);
+    }
+    signupcontract.on("StringCreated", handleStringCreated);
   };
 
   return (
@@ -195,6 +206,9 @@ const signup = () => {
         </div>
         <div className="Metamask button">
           <button onClick={loadAddress}>Metamask Button</button>
+        </div>
+        <div className="Start Listener button">
+          <button onClick={startListener}>Start Listener</button>
         </div>
       </div>
     </div>
