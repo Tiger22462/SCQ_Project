@@ -126,22 +126,52 @@ const signup = () => {
     function handleStringCreated(userAddress: string, data: string) {
       console.log("StringCreated event received for user:", userAddress);
       console.log("String data:", data);
+      //database ->
+      const url = 'http://localhost:8000/register';
+
+      const requestBody = {
+        username: data,
+        email: data,
+        password: data,
+        phone: data,
+      };
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Response:', data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      ////
+
     }
+    console.log("start listener")
     signupcontract.on("StringCreated", handleStringCreated);
   };
 
   const register = async () => {
     const url = 'http://localhost:8000/register';
 
-    // Define the request body as an object
     const requestBody = {
       username: userSignup.username,
       email: userSignup.email,
-      password: '12343',
-      phone: 'phonetest123',
+      password: userSignup.password,
+      phone: userSignup.phone,
     };
 
-    // Send a POST request with the JSON payload
     fetch(url, {
       method: 'POST',
       headers: {
@@ -156,11 +186,9 @@ const signup = () => {
         return response.json();
       })
       .then(data => {
-        // Handle the response data here
         console.log('Response:', data);
       })
       .catch(error => {
-        // Handle any errors that occurred during the fetch
         console.error('Error:', error);
       });
   };
