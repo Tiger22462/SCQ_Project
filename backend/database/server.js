@@ -8,6 +8,17 @@ const connectDB = require("./config/dbConn");
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+const cors = require('cors');
+
+// Enable CORS for all routes
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: 'GET,,POST',
+}));
+
+
+
 connectDB();
 
 // Connect to MongoDB using Mongoose

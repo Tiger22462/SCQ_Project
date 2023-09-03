@@ -130,6 +130,42 @@ const signup = () => {
     signupcontract.on("StringCreated", handleStringCreated);
   };
 
+  const register = async () => {
+    const url = 'http://localhost:8000/register';
+
+    // Define the request body as an object
+    const requestBody = {
+      username: userSignup.username,
+      email: userSignup.email,
+      password: '12343',
+      phone: 'phonetest123',
+    };
+
+    // Send a POST request with the JSON payload
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Handle the response data here
+        console.log('Response:', data);
+      })
+      .catch(error => {
+        // Handle any errors that occurred during the fetch
+        console.error('Error:', error);
+      });
+  };
+
+
   return (
     <div>
       <div className="Upper">
@@ -212,6 +248,9 @@ const signup = () => {
         </div>
         <div className="Start Listener button">
           <button onClick={startListener}>Start Listener</button>
+        </div>
+        <div className="register">
+          <button onClick={register}>Register</button>
         </div>
       </div>
     </div>
