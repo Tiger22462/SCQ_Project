@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import SignupContract from "../../../backend/smartcontract/build/contracts/SignupContract.json";
+import StringContract from "../../../backend/smartcontract/build/contracts/StringContract.json";
 
 ////////////////////////////////////////////////////////////////////
 //loadWeb3Address return user.address ex. 0x34752E0DeC3d55xxxxxxxx
@@ -52,14 +53,24 @@ export const req_InitAccount = () => {
 ////////////////////////////////////////////////////////////////////
 //set contractdata to use methods
 export const loadSignupContract = async (address: any) => {
-  console.log(address);
   const provider = new ethers.BrowserProvider((window as any).ethereum);
   const signer = await provider.getSigner(address);
-  console.log(signer);
-  //console.log(signer)
   const contractdata = new ethers.Contract(
     SignupContract.networks[5777].address,
     SignupContract.abi,
+    signer
+  );
+  return { contractdata, signer };
+};
+
+////////////////////////////////////////////////////////////////////
+//set contractdata to use methods
+export const loadStringContract = async (address: any) => {
+  const provider = new ethers.BrowserProvider((window as any).ethereum);
+  const signer = await provider.getSigner(address);
+  const contractdata = new ethers.Contract(
+    StringContract.networks[5777].address,
+    StringContract.abi,
     signer
   );
   return { contractdata, signer };
