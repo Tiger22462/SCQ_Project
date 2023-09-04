@@ -13,7 +13,6 @@ type UserSignup = {
   email: string;
   phone: string;
   password: string;
-  address: string;
 };
 
 const signup = () => {
@@ -23,7 +22,6 @@ const signup = () => {
     email: "",
     phone: "",
     password: "",
-    address: "",
   };
   const [userSignup, setUserSignup] = useState<UserSignup>(initialUserSignup);
 
@@ -88,10 +86,14 @@ const signup = () => {
   const onSignup = async () => {
     try {
       if (address) {
-        console.log(userSignup.username);
-
-        const tx = await signupcontract.createString(userSignup.username);
+        console.log("User input")
+        console.log("Username : " + userSignup.username);
+        console.log("Password : " + userSignup.password);
+        console.log("Email : " + userSignup.email);
+        console.log("Phone : " + userSignup.phone);
+        const tx = await signupcontract.createUser(userSignup.username,userSignup.password,userSignup.email,userSignup.password);
         await tx.wait();
+        console.log("Push complete")
       } else {
         alert("No address. Please connect to MetaMask.");
       }
@@ -111,29 +113,19 @@ const signup = () => {
     }
   };
 
-  const checkSignup = async () => {
-    if (userSignup.address && address) {
-      setCheckString(signupcontract.getString(userSignup.address));
-    } else if (!userSignup.address) {
-      alert("Please enter address");
-    } else if (!address) {
-      alert("No address please connect to metamask");
-    }
-  };
-
   //Event handle for send data to database
   const startListener = async () => {
-    function handleStringCreated(userAddress: string, data: string) {
+    function handleUserCreated(userAddress: string, username: string,password : string , email : string , phone : string) {
       console.log("StringCreated event received for user:", userAddress);
-      console.log("String data:", data);
+      console.log("String data:", username,password,email,phone);
       //database ->
       const url = 'http://localhost:8000/register';
 
       const requestBody = {
-        username: data,
-        email: data,
-        password: data,
-        phone: data,
+        username: username,
+        email: email,
+        password: password,
+        phone: phone,
       };
 
       fetch(url, {
@@ -159,39 +151,36 @@ const signup = () => {
 
     }
     console.log("start listener")
-    signupcontract.on("StringCreated", handleStringCreated);
+    signupcontract.on("UserCreated", handleUserCreated);
   };
 
   const register = async () => {
     const url = 'http://localhost:8000/register';
 
-    const requestBody = {
-      username: userSignup.username,
-      email: userSignup.email,
-      password: userSignup.password,
-      phone: userSignup.phone,
-    };
+      const requestBody = {
+        username: userSignup.username,
+        email: userSignup.email,
+        password: userSignup.password,
+        phone: userSignup.phone,
+      };
 
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       })
-      .then(data => {
-        console.log('Response:', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-  };
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          console.log('Response:', data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+  }
 
 
   return (
@@ -200,6 +189,9 @@ const signup = () => {
         <h1> Signup Page</h1>
       </div>
       <div className="Address">
+        <div className="Metamask button">
+          <button onClick={loadAddress}>Metamask Button</button>
+        </div>
         <h3> Address : {address}</h3>
       </div>
       <div className="Signuppanel">
@@ -255,30 +247,11 @@ const signup = () => {
         <div className="button">
           <button onClick={onSignup}>Signup</button>
         </div>
-        <div className="Address">
-          <label> Addresscheck </label>
-          <input
-            type="text"
-            name="Address"
-            id="Address"
-            placeholder="Address"
-            onChange={(e) => {
-              setUserSignup({ ...userSignup, address: e.target.value });
-            }}
-          />
-        </div>
-        <div className="Checkbutton">
-          <button onClick={checkSignup}>Check Value</button>
-          <h3>{checkstring}</h3>
-        </div>
-        <div className="Metamask button">
-          <button onClick={loadAddress}>Metamask Button</button>
-        </div>
         <div className="Start Listener button">
           <button onClick={startListener}>Start Listener</button>
         </div>
-        <div className="register">
-          <button onClick={register}>Register</button>
+        <div className="Start Listener button">
+          <button onClick={register}>Register Manual</button>
         </div>
       </div>
     </div>
